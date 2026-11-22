@@ -48,3 +48,22 @@ def test_rejects_bad_input():
     status, out = compute_chart({"birth_time": {"year": 1990, "month": 2, "day": 30, "hour": 1}, "gender": "男"})
     assert status == 400 and "error" in out
     assert compute_chart({"birth_time": {"year": 1990, "month": 1, "day": 1, "hour": 1}})[0] == 400
+
+
+def test_invalid_lunar_date_is_400():
+    payload = {"calendar_type": "lunar", "birth_time": {"year": 1990, "month": 2, "day": 31, "hour": 8, "minute": 0}, "gender": "男"}
+    status, out = compute_chart(payload)
+    assert status == 400 and "error" in out
+
+
+def test_default_query_year_is_lunar(monkeypatch):
+    import chart
+    from datetime import datetime as real_dt
+
+    class FakeDT(real_dt):
+        @classmethod
+        def now(cls, tz=None):
+            return real_dt(2027, 1, 20, 12, tzinfo=tz)
+
+    monkeypatch.setattr(chart, "datetime", FakeDT)
+    assert chart.current_lunar_year() == 2026

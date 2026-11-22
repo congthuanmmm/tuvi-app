@@ -1,16 +1,24 @@
 import json
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler
 from typing import Any
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "_lib"))
 
+from lunar_python import Solar  # noqa: E402
 from ziwei_cli import build_output  # noqa: E402
+
+VN_TZ = timezone(timedelta(hours=7))
 
 MIN_YEAR, MAX_YEAR = 1900, 2100
 MAX_BODY_BYTES = 4096
+
+
+def current_lunar_year() -> int:
+    now = datetime.now(VN_TZ)
+    return Solar.fromYmd(now.year, now.month, now.day).getLunar().getYear()
 
 
 def compute_chart(payload: Any) -> tuple[int, dict[str, Any]]:
@@ -32,12 +40,14 @@ def compute_chart(payload: Any) -> tuple[int, dict[str, Any]]:
         "gender": payload.get("gender"),
         "late_zi_rule": payload.get("late_zi_rule") or "next_day",
         "leap_month_rule": payload.get("leap_month_rule") or None,
-        "query_year": payload.get("query_year") or datetime.now().year,
+        "query_year": payload.get("query_year") or current_lunar_year(),
     }
     try:
         return 200, build_output(request)
     except (ValueError, KeyError, TypeError, AssertionError) as exc:
         return 400, {"error": str(exc)}
+    except Exception:
+        return 400, {"error": "Ngày sinh không hợp lệ"}
 
 
 class handler(BaseHTTPRequestHandler):
