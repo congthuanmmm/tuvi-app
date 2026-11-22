@@ -49,7 +49,6 @@ export default function ChartPage() {
 
   useEffect(() => {
     if (isTemp && session && chart && hasAutoRead() && !autoSaved.current) {
-      autoSaved.current = true;
       save();
     }
   });
@@ -59,6 +58,8 @@ export default function ChartPage() {
     if (autoRead) requestAutoRead();
     else takeAutoRead();
     if (!session) return openLogin(autoRead ? "Đăng nhập để AI luận giải lá số này." : "Đăng nhập để lưu lá số.");
+    if (autoSaved.current) return;
+    autoSaved.current = true;
     setSaving(true);
     setError("");
     try {
@@ -67,6 +68,8 @@ export default function ChartPage() {
       router.replace(`/la-so/${newId}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Có lỗi xảy ra");
+      takeAutoRead();
+      autoSaved.current = false;
       setSaving(false);
     }
   }
