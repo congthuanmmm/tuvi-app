@@ -51,13 +51,13 @@ export default function HistoryPage() {
 
       {session && rows === null && <div className="mt-8 h-40 animate-pulse rounded-2xl bg-paper" aria-label="Đang tải" />}
 
-      {rows?.length === 0 && (
+      {session && rows?.length === 0 && (
         <div className="mt-8 rounded-2xl border border-dashed border-line bg-paper p-8 text-center text-stone-700">
           Bạn chưa lưu lá số nào.
         </div>
       )}
 
-      {rows && rows.length > 0 && (
+      {session && rows && rows.length > 0 && (
         <ul className="mt-6 divide-y divide-line overflow-hidden rounded-2xl border border-line bg-paper">
           {rows.map((r) => {
             const b = r.birth.birth_time;
