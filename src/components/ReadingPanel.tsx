@@ -6,6 +6,7 @@ import { Send, Sparkles } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import { vnToday } from "@/lib/hooks/useSession";
+import Reveal from "@/components/Reveal";
 
 const LIMIT = 3;
 
@@ -47,10 +48,11 @@ function Reading({ content }: { content: string }) {
       </nav>
       {intro && <div className="prose-reading leading-relaxed text-stone-700"><ReactMarkdown>{intro}</ReactMarkdown></div>}
       {sections.map((s) => (
-        <section key={s.id} id={s.id} className="scroll-mt-32 rounded-2xl border border-line bg-paper p-5">
+        <Reveal as="section" key={s.id} className="scroll-mt-32 rounded-2xl border border-line bg-paper p-5">
+          <span id={s.id} className="block scroll-mt-32" aria-hidden="true" />
           <h3 className="font-serif text-xl font-bold text-ink">{s.title}</h3>
           <div className="prose-reading mt-2 text-[15px] leading-relaxed"><ReactMarkdown>{s.body}</ReactMarkdown></div>
-        </section>
+        </Reveal>
       ))}
     </div>
   );

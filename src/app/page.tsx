@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CalendarRange, LayoutGrid, MessageCircle, ShieldCheck, Sparkles } from "lucide-react";
 import HeroForm from "@/components/HeroForm";
+import Reveal from "@/components/Reveal";
 import { PALACE_INFO } from "@/lib/ziwei/palaces";
 
 const FEATURES = [
@@ -55,36 +56,36 @@ export default function Home() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-12">
-        <h2 className="font-serif text-3xl font-bold text-ink">Bạn nhận được gì</h2>
+        <Reveal><h2 className="font-serif text-3xl font-bold text-ink">Bạn nhận được gì</h2></Reveal>
         <p className="mt-2 text-stone-700">Một lá số đầy đủ và bài luận giải dễ hiểu cho người không chuyên.</p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {FEATURES.map(({ icon: Icon, title, text }) => (
-            <div key={title} className="rounded-2xl border border-line bg-paper p-5">
+          {FEATURES.map(({ icon: Icon, title, text }, i) => (
+            <Reveal key={title} delay={i * 90} className="rounded-2xl border border-line bg-paper p-5">
               <span className="grid h-11 w-11 place-items-center rounded-xl bg-ink text-gold"><Icon size={22} aria-hidden="true" /></span>
               <h3 className="mt-4 font-semibold text-ink">{title}</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-stone-700">{text}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-12">
-        <h2 className="font-serif text-3xl font-bold text-ink">3 bước để xem lá số</h2>
+        <Reveal><h2 className="font-serif text-3xl font-bold text-ink">3 bước để xem lá số</h2></Reveal>
         <ol className="mt-8 grid gap-4 md:grid-cols-3">
           {STEPS.map((s, i) => (
-            <li key={s.title} className="flex gap-4 rounded-2xl border border-line bg-paper p-5">
+            <Reveal as="li" key={s.title} delay={i * 120} className="flex gap-4 rounded-2xl border border-line bg-paper p-5">
               <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold font-serif text-lg font-bold text-ink">{i + 1}</span>
               <div>
                 <h3 className="font-semibold text-ink">{s.title}</h3>
                 <p className="mt-1 text-sm leading-relaxed text-stone-700">{s.text}</p>
               </div>
-            </li>
+            </Reveal>
           ))}
         </ol>
       </section>
 
       <section id="12-cung" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-12">
-        <div className="rounded-3xl border border-line bg-paper p-6 sm:p-10">
+        <Reveal className="rounded-3xl border border-line bg-paper p-6 sm:p-10">
           <h2 className="font-serif text-3xl font-bold text-ink">Lá số tử vi là gì?</h2>
           <div className="mt-4 max-w-3xl space-y-3 leading-relaxed text-stone-700">
             <p>
@@ -102,12 +103,12 @@ export default function Home() {
               </li>
             ))}
           </ul>
-        </div>
+        </Reveal>
       </section>
 
       <section id="hoi-dap" className="mx-auto max-w-3xl scroll-mt-20 px-4 py-12">
         <h2 className="text-center font-serif text-3xl font-bold text-ink">Câu hỏi thường gặp</h2>
-        <div className="mt-8 divide-y divide-line rounded-2xl border border-line bg-paper">
+        <Reveal className="mt-8 divide-y divide-line rounded-2xl border border-line bg-paper">
           {FAQ.map((f) => (
             <details key={f.q} className="group px-5">
               <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-3 font-medium text-ink [&::-webkit-details-marker]:hidden">
@@ -117,11 +118,11 @@ export default function Home() {
               <p className="pb-4 leading-relaxed text-stone-700">{f.a}</p>
             </details>
           ))}
-        </div>
+        </Reveal>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pt-6">
-        <div className="flex flex-col items-center gap-5 rounded-3xl bg-ink px-6 py-10 text-center sm:flex-row sm:justify-between sm:px-10 sm:text-left">
+        <Reveal className="flex flex-col items-center gap-5 rounded-3xl bg-ink px-6 py-10 text-center sm:flex-row sm:justify-between sm:px-10 sm:text-left">
           <div>
             <h2 className="font-serif text-2xl font-bold text-gold sm:text-3xl">Xem lá số của bạn ngay</h2>
             <p className="mt-2 text-stone-300">Miễn phí, chỉ cần ngày giờ sinh.</p>
@@ -129,7 +130,7 @@ export default function Home() {
           <Link href="/#lap-la-so" className="rounded-xl bg-gold px-6 py-3 font-semibold text-ink transition-opacity hover:opacity-90">
             Lập lá số
           </Link>
-        </div>
+        </Reveal>
       </section>
     </main>
   );
