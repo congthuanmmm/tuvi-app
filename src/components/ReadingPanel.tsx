@@ -58,9 +58,10 @@ function Reading({ content }: { content: string }) {
   );
 }
 
-export default function ReadingPanel({ session, chartId }: { session: Session; chartId: string }) {
+export default function ReadingPanel({ session, chartId, autoStart = false }: { session: Session; chartId: string; autoStart?: boolean }) {
   const [messages, setMessages] = useState<Msg[] | null>(null);
-  const [used, setUsed] = useState(0);
+  const [used, setUsed] = useState<number | null>(null);
+  const autoStarted = useRef(false);
   const [question, setQuestion] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -74,6 +75,13 @@ export default function ReadingPanel({ session, chartId }: { session: Session; c
       .from("ai_usage").select("count").eq("user_id", session.user.id).eq("day", vnToday()).maybeSingle()
       .then(({ data }) => setUsed(data?.count ?? 0));
   }, [session.user.id, chartId]);
+
+  useEffect(() => {
+    if (autoStart && !autoStarted.current && messages?.length === 0 && used !== null && used < LIMIT) {
+      autoStarted.current = true;
+      ask();
+    }
+  });
 
   useEffect(() => {
     if (messages && messages.length > 1) bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -102,7 +110,7 @@ export default function ReadingPanel({ session, chartId }: { session: Session; c
     }
   }
 
-  const left = Math.max(LIMIT - used, 0);
+  const left = Math.max(LIMIT - (used ?? 0), 0);
   const [first, ...chat] = messages ?? [];
 
   return (
