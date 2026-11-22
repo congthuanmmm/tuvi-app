@@ -31,8 +31,9 @@ export async function POST(req: Request) {
     .from("charts").select("id, label, result").eq("id", chartId).eq("user_id", user.id).maybeSingle();
   if (!chart) return err(404, "Không tìm thấy lá số");
 
-  const { data: history } = await supabaseAdmin
+  const { data: history, error: historyError } = await supabaseAdmin
     .from("messages").select("role, content").eq("chart_id", chartId).order("id");
+  if (historyError) return err(500, "Không tải được lịch sử luận giải, vui lòng thử lại");
   const messages = history ?? [];
   if (!question && messages.length > 0) return err(400, "Lá số này đã được luận giải");
   if (question && messages.length === 0) return err(400, "Hãy bấm Luận giải trước khi hỏi thêm");
