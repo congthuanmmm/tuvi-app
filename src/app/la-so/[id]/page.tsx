@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Save, Sparkles } from "lucide-react";
@@ -9,7 +9,7 @@ import ReadingPanel from "@/components/ReadingPanel";
 import { useLogin } from "@/components/LoginProvider";
 import { useSession } from "@/lib/hooks/useSession";
 import { supabase } from "@/lib/supabase/client";
-import { TEMP_KEY, type StoredChart, readTempChart, saveChart } from "@/lib/charts";
+import { TEMP_KEY, type StoredChart, hasAutoRead, readTempChart, requestAutoRead, saveChart, takeAutoRead } from "@/lib/charts";
 import { translateWarning, vi } from "@/lib/ziwei/i18n";
 
 export default function ChartPage() {
@@ -22,6 +22,8 @@ export default function ChartPage() {
   const [status, setStatus] = useState<"loading" | "ok" | "missing" | "login">("loading");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [autoStart, setAutoStart] = useState(false);
+  const autoSaved = useRef(false);
 
   useEffect(() => {
     if (isTemp) {
@@ -41,9 +43,22 @@ export default function ChartPage() {
     });
   }, [id, isTemp, ready, session]);
 
-  async function save() {
+  useEffect(() => {
+    if (!isTemp && session && status === "ok") setAutoStart(takeAutoRead());
+  }, [isTemp, session, status]);
+
+  useEffect(() => {
+    if (isTemp && session && chart && hasAutoRead() && !autoSaved.current) {
+      autoSaved.current = true;
+      save();
+    }
+  });
+
+  async function save(autoRead = true) {
     if (!chart) return;
-    if (!session) return openLogin("Đăng nhập để lưu lá số và dùng AI luận giải.");
+    if (autoRead) requestAutoRead();
+    else takeAutoRead();
+    if (!session) return openLogin(autoRead ? "Đăng nhập để AI luận giải lá số này." : "Đăng nhập để lưu lá số.");
     setSaving(true);
     setError("");
     try {
@@ -91,7 +106,7 @@ export default function ChartPage() {
           <h1 className="font-serif text-3xl font-bold text-ink">{birth.name ? `Lá số của ${birth.name}` : "Lá số của bạn"}</h1>
         </div>
         {isTemp && (
-          <button onClick={save} disabled={saving}
+          <button onClick={() => save(false)} disabled={saving}
             className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-xl bg-ink px-5 font-semibold text-gold transition-colors hover:bg-ink-soft disabled:opacity-60">
             <Save size={18} aria-hidden="true" /> {saving ? "Đang lưu..." : "Lưu lá số"}
           </button>
@@ -131,7 +146,7 @@ export default function ChartPage() {
       ))}
 
       {!isTemp && session ? (
-        <ReadingPanel session={session} chartId={id} />
+        <ReadingPanel session={session} chartId={id} autoStart={autoStart} />
       ) : (
         <div className="rounded-2xl bg-ink p-6 text-center text-stone-200 sm:p-8">
           <Sparkles className="mx-auto text-gold" size={28} aria-hidden="true" />
@@ -139,7 +154,7 @@ export default function ChartPage() {
           <p className="mx-auto mt-2 max-w-md">
             {session ? "Lưu lá số để AI luận giải và hỏi thêm." : "Đăng nhập bằng Google để lưu lá số và nhận 3 lượt luận giải miễn phí mỗi ngày."}
           </p>
-          <button onClick={save} disabled={saving}
+          <button onClick={() => save()} disabled={saving}
             className="mt-5 h-12 cursor-pointer rounded-xl bg-gold px-6 font-semibold text-ink transition-opacity hover:opacity-90 disabled:opacity-60">
             {session ? (saving ? "Đang lưu..." : "Lưu và luận giải") : "Đăng nhập để luận giải"}
           </button>

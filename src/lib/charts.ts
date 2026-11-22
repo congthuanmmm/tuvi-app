@@ -2,6 +2,22 @@ import { supabase } from "@/lib/supabase/client";
 import type { BirthInput, ChartResult } from "@/lib/ziwei/types";
 
 export const TEMP_KEY = "lsv:temp-chart";
+const AUTO_READ_KEY = "lsv:auto-read";
+
+export function requestAutoRead() {
+  sessionStorage.setItem(AUTO_READ_KEY, String(Date.now()));
+}
+
+export function hasAutoRead(): boolean {
+  const t = Number(sessionStorage.getItem(AUTO_READ_KEY));
+  return Date.now() - t < 15 * 60 * 1000;
+}
+
+export function takeAutoRead(): boolean {
+  const ok = hasAutoRead();
+  sessionStorage.removeItem(AUTO_READ_KEY);
+  return ok;
+}
 
 export interface StoredChart {
   birth: BirthInput;
