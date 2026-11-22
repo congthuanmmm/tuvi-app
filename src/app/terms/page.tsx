@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import LegalPage from "@/components/LegalPage";
+import { OG_IMAGES, SITE_NAME } from "@/lib/site";
 
-export const metadata: Metadata = { title: "Điều khoản sử dụng", alternates: { canonical: "/terms" } };
+export const metadata: Metadata = {
+  title: "Điều khoản sử dụng",
+  alternates: { canonical: "/terms" },
+  openGraph: { type: "website", locale: "vi_VN", siteName: SITE_NAME, url: "/terms", title: `Điều khoản sử dụng | ${SITE_NAME}`, images: OG_IMAGES },
+};
 
 export default function TermsPage() {
   return (

@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import LegalPage from "@/components/LegalPage";
+import { OG_IMAGES, SITE_NAME } from "@/lib/site";
 
-export const metadata: Metadata = { title: "Chính sách bảo mật", alternates: { canonical: "/privacy" } };
+export const metadata: Metadata = {
+  title: "Chính sách bảo mật",
+  alternates: { canonical: "/privacy" },
+  openGraph: { type: "website", locale: "vi_VN", siteName: SITE_NAME, url: "/privacy", title: `Chính sách bảo mật | ${SITE_NAME}`, images: OG_IMAGES },
+};
 
 export default function PrivacyPage() {
   return (

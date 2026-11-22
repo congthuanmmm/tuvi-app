@@ -3,7 +3,7 @@ import { Be_Vietnam_Pro, Noto_Sans_SC, Noto_Serif } from "next/font/google";
 import LoginProvider from "@/components/LoginProvider";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
+import { OG_IMAGES, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const font = Be_Vietnam_Pro({
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     title: `${SITE_NAME} - Lập lá số Tử Vi miễn phí & luận giải AI`,
     description: SITE_DESCRIPTION,
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: SITE_NAME }],
+    images: OG_IMAGES,
   },
   twitter: { card: "summary_large_image", title: SITE_NAME, description: SITE_DESCRIPTION, images: ["/og.png"] },
   robots: { index: true, follow: true },
