@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import LegalPage from "@/components/LegalPage";
 
-export const metadata: Metadata = { title: "Điều khoản sử dụng - Tử Vi Đẩu Số" };
+export const metadata: Metadata = { title: "Điều khoản sử dụng", alternates: { canonical: "/terms" } };
 
 export default function TermsPage() {
   return (

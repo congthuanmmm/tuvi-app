@@ -3,6 +3,8 @@ import { CalendarRange, LayoutGrid, MessageCircle, ShieldCheck, Sparkles } from 
 import HeroForm from "@/components/HeroForm";
 import Reveal from "@/components/Reveal";
 import { PALACE_INFO } from "@/lib/ziwei/palaces";
+import { CONTACT_EMAIL } from "@/components/SiteFooter";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
 const FEATURES = [
   { icon: LayoutGrid, title: "Lá số 12 cung", text: "An đủ 14 chính tinh, phụ tinh, tứ hóa và độ sáng theo phái Tam Hợp, kèm tên chữ Hán." },
@@ -26,9 +28,46 @@ const FAQ = [
   { q: "Thông tin của tôi có được bảo mật không?", a: "Lá số chỉ hiển thị với chính tài khoản của bạn và bạn có thể xóa bất cứ lúc nào. Xem chi tiết trong Chính sách bảo mật." },
 ];
 
+const JSON_LD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      url: `${SITE_URL}/`,
+      name: SITE_NAME,
+      description: SITE_DESCRIPTION,
+      inLanguage: "vi",
+      publisher: { "@id": `${SITE_URL}/#organization` },
+    },
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: SITE_NAME,
+      url: `${SITE_URL}/`,
+      logo: `${SITE_URL}/logo.png`,
+      email: CONTACT_EMAIL,
+    },
+    {
+      "@type": "WebApplication",
+      name: SITE_NAME,
+      url: `${SITE_URL}/`,
+      applicationCategory: "LifestyleApplication",
+      operatingSystem: "Web",
+      inLanguage: "vi",
+      offers: { "@type": "Offer", price: "0", priceCurrency: "VND" },
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: FAQ.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+    },
+  ],
+};
+
 export default function Home() {
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD).replace(/</g, "\\u003c") }} />
       <section className="relative overflow-hidden">
         <div aria-hidden="true" className="pointer-events-none absolute -right-40 -top-40 h-[520px] w-[520px] rounded-full bg-gold/25 blur-3xl" />
         <div className="relative mx-auto grid max-w-6xl items-start gap-10 px-4 py-10 md:py-16 lg:grid-cols-[1.1fr_1fr]">
