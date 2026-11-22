@@ -45,6 +45,25 @@ const schema = {
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash";
+const OPENAI_BASE = process.env.LLM_BASE_URL;
+
+const SHAPE = `{"summary": string, "sections": [{"heading": string, "body": string}], "faq": [{"q": string, "a": string}], "related": string[]}`;
+
+async function generate({ contents, config }) {
+  if (!OPENAI_BASE) return ai.models.generateContent({ model: MODEL, contents, config });
+  const messages = [
+    ...(config.systemInstruction ? [{ role: "system", content: config.systemInstruction }] : []),
+    { role: "user", content: `${contents}\n\nChỉ trả về một đối tượng JSON đúng cấu trúc: ${SHAPE}` },
+  ];
+  const r = await fetch(`${OPENAI_BASE}/chat/completions`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${process.env.LLM_API_KEY}` },
+    body: JSON.stringify({ model: MODEL, messages, temperature: config.temperature, max_tokens: 32000, response_format: { type: "json_object" } }),
+  });
+  const body = await r.text();
+  if (!r.ok) throw new Error(`${r.status} ${body.slice(0, 200)}`);
+  return { text: JSON.parse(body).choices[0].message.content };
+}
 const allSlugs = ENTRIES.map((x) => `${x.type}/${x.slug} (${x.name})`).join(", ");
 
 const strayHan = (d) => JSON.stringify(d).replace(/（[^）]*）|\([^)]*\)/g, "").match(/[\u4e00-\u9fff]+/g);
@@ -52,7 +71,7 @@ const strayHan = (d) => JSON.stringify(d).replace(/（[^）]*）|\([^)]*\)/g, ""
 const wordCount = (d) => d.sections.map((s) => s.body).join(" ").split(/\s+/).length;
 
 async function expand(data, entry) {
-  const res = await ai.models.generateContent({
+  const res = await generate({
     model: MODEL,
     contents: `Bài viết Wiki tử vi về "${entry.name}" dưới đây mới có ${wordCount(data)} chữ, cần 750-950 chữ ở phần sections.
 Viết mở rộng từng mục: thêm giải thích, ví dụ cách luận và lưu ý thực tế, dựa trên đúng nội dung đã có, không bịa số liệu. Giữ nguyên summary, faq, related và văn phong. Chữ Hán chỉ đặt trong ngoặc. Trả về đúng cấu trúc JSON.
@@ -64,7 +83,7 @@ ${JSON.stringify(data)}`,
 }
 
 async function repairHan(data) {
-  const res = await ai.models.generateContent({
+  const res = await generate({
     model: MODEL,
     contents: `Trong JSON dưới đây có các cụm chữ Hán nằm ngoài ngoặc: ${strayHan(data).join(", ")}.
 Thay mỗi cụm đó bằng từ tiếng Việt tương đương cho câu văn trôi chảy. Không thêm chữ Hán mới ngoài ngoặc. Giữ nguyên mọi nội dung khác, trả về đúng cấu trúc JSON.
@@ -85,7 +104,7 @@ Tài liệu tham khảo:
 ${SOURCES[entry.type]()}`;
   for (let attempt = 1; attempt <= 6; attempt++) {
     try {
-      const res = await ai.models.generateContent({
+      const res = await generate({
         model: MODEL,
         contents: prompt,
         config: { systemInstruction: SYSTEM, temperature: Number(process.env.WIKI_TEMPERATURE || 0.6), responseMimeType: "application/json", responseSchema: schema },
@@ -101,7 +120,7 @@ ${SOURCES[entry.type]()}`;
       const total = wordCount(data);
       if (total < 600) throw new Error(`too short ${total}`);
       if (/Bắc Đẩu|Nam Đẩu/.test(all)) throw new Error("dau wording");
-      if (!data.summary.includes(`(${entry.han})`) && !data.summary.includes(`（${entry.han}）`)) throw new Error("missing han in summary");
+      if (!entry.han.split(/\s*\/\s*/).every((h) => data.summary.includes(h))) throw new Error("missing han in summary");
       if (data.sections.length < 4 || data.faq.length < 3) throw new Error("structure");
       const valid = new Set(ENTRIES.map((x) => `${x.type}/${x.slug}`));
       data.related = data.related.filter((r) => valid.has(r) && r !== `${entry.type}/${entry.slug}`);
