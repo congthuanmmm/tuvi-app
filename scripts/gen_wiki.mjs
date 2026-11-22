@@ -27,7 +27,7 @@ Quy tắc:
 - Khi nhắc nhóm sao, gọi là chòm Tử Vi (gồm Tử Vi, Thiên Cơ, Thái Dương, Vũ Khúc, Thiên Đồng, Liêm Trinh) và chòm Thiên Phủ (các chính tinh còn lại); không gán sao vào Bắc Đẩu hay Nam Đẩu.
 - Không để sót chữ Hán đơn lẻ ngoài ngoặc.
 - Sức khỏe, pháp lý, tài chính: chỉ nói ở mức xu hướng và khuyên hỏi chuyên gia.
-- Độ dài phần sections tổng cộng 600-1000 chữ. summary 2-3 câu, trả lời trực tiếp "X là gì / nói về điều gì" để công cụ AI trích dẫn được.
+- Độ dài phần sections tổng cộng 700-1000 chữ (tối thiểu 700 chữ, mỗi mục ít nhất 2 đoạn). summary 2-3 câu, trả lời trực tiếp "X là gì / nói về điều gì" để công cụ AI trích dẫn được.
 - sections: 4-6 mục, heading ngắn (không đánh số), body là Markdown (đoạn văn, danh sách gạch đầu dòng, chữ đậm). Không dùng tiêu đề Markdown (#) trong body.
 - faq: 3-4 câu hỏi người dùng hay tìm trên Google, câu trả lời 2-4 câu.
 - related: 3-6 slug liên quan, chỉ chọn trong danh sách được cung cấp, dạng "type/slug".`;
@@ -47,6 +47,34 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash";
 const allSlugs = ENTRIES.map((x) => `${x.type}/${x.slug} (${x.name})`).join(", ");
 
+const strayHan = (d) => JSON.stringify(d).replace(/（[^）]*）|\([^)]*\)/g, "").match(/[\u4e00-\u9fff]+/g);
+
+const wordCount = (d) => d.sections.map((s) => s.body).join(" ").split(/\s+/).length;
+
+async function expand(data, entry) {
+  const res = await ai.models.generateContent({
+    model: MODEL,
+    contents: `Bài viết Wiki tử vi về "${entry.name}" dưới đây mới có ${wordCount(data)} chữ, cần 750-950 chữ ở phần sections.
+Viết mở rộng từng mục: thêm giải thích, ví dụ cách luận và lưu ý thực tế, dựa trên đúng nội dung đã có, không bịa số liệu. Giữ nguyên summary, faq, related và văn phong. Chữ Hán chỉ đặt trong ngoặc. Trả về đúng cấu trúc JSON.
+
+${JSON.stringify(data)}`,
+    config: { systemInstruction: SYSTEM, temperature: 0.4, responseMimeType: "application/json", responseSchema: schema },
+  });
+  return JSON.parse(res.text);
+}
+
+async function repairHan(data) {
+  const res = await ai.models.generateContent({
+    model: MODEL,
+    contents: `Trong JSON dưới đây có các cụm chữ Hán nằm ngoài ngoặc: ${strayHan(data).join(", ")}.
+Thay mỗi cụm đó bằng từ tiếng Việt tương đương cho câu văn trôi chảy. Không thêm chữ Hán mới ngoài ngoặc. Giữ nguyên mọi nội dung khác, trả về đúng cấu trúc JSON.
+
+${JSON.stringify(data)}`,
+    config: { temperature: 0, responseMimeType: "application/json", responseSchema: schema },
+  });
+  return JSON.parse(res.text);
+}
+
 async function gen(entry) {
   const out = join("content/wiki", entry.type, `${entry.slug}.json`);
   if (existsSync(out) && !process.argv.includes("--force")) return console.log("skip", out);
@@ -60,11 +88,21 @@ ${SOURCES[entry.type]()}`;
       const res = await ai.models.generateContent({
         model: MODEL,
         contents: prompt,
-        config: { systemInstruction: SYSTEM, temperature: 0.6, responseMimeType: "application/json", responseSchema: schema },
+        config: { systemInstruction: SYSTEM, temperature: Number(process.env.WIKI_TEMPERATURE || 0.6), responseMimeType: "application/json", responseSchema: schema },
       });
-      const data = JSON.parse(res.text);
-      const stray = JSON.stringify(data).replace(/（[^）]*）|\([^)]*\)/g, "").match(/[\u4e00-\u9fff]+/g);
+      let data = JSON.parse(res.text);
+      for (let i = 0; i < 2 && wordCount(data) < 650; i++) data = await expand(data, entry);
+      if (strayHan(data)) data = await repairHan(data);
+      if (!data.summary.includes(`(${entry.han})`) && data.summary.includes(entry.name))
+        data.summary = data.summary.replace(entry.name, `${entry.name} (${entry.han})`);
+      const stray = strayHan(data);
       if (stray) throw new Error(`stray han ${stray.join(",")}`);
+      const all = JSON.stringify(data);
+      const total = wordCount(data);
+      if (total < 600) throw new Error(`too short ${total}`);
+      if (/Bắc Đẩu|Nam Đẩu/.test(all)) throw new Error("dau wording");
+      if (!data.summary.includes(`(${entry.han})`) && !data.summary.includes(`（${entry.han}）`)) throw new Error("missing han in summary");
+      if (data.sections.length < 4 || data.faq.length < 3) throw new Error("structure");
       const valid = new Set(ENTRIES.map((x) => `${x.type}/${x.slug}`));
       data.related = data.related.filter((r) => valid.has(r) && r !== `${entry.type}/${entry.slug}`);
       mkdirSync(dirname(out), { recursive: true });
@@ -73,11 +111,12 @@ ${SOURCES[entry.type]()}`;
       return console.log("ok", out, `${words} words`);
     } catch (err) {
       console.error("retry", entry.slug, attempt, err.message?.slice(0, 120));
-      const wait = Number(err.message?.match(/retry in ([\d.]+)s/)?.[1] ?? 5);
+      const wait = Number(err.message?.match(/retry in ([\d.]+)s/)?.[1] ?? 10 * attempt);
       await new Promise((r) => setTimeout(r, (wait + 2) * 1000));
     }
   }
-  throw new Error(`failed ${entry.slug}`);
+  console.error("FAILED", entry.type + "/" + entry.slug);
+  process.exitCode = 1;
 }
 
 const picks = process.argv.slice(2).filter((a) => !a.startsWith("--"));
