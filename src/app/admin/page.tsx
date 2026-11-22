@@ -47,7 +47,10 @@ export default function AdminPage() {
   const [sort, setSort] = useState<SortKey>("created_at");
 
   useEffect(() => {
-    if (!session) return;
+    if (!session) {
+      setUsers(null);
+      return;
+    }
     fetch("/api/admin", { headers: { Authorization: `Bearer ${session.access_token}` } }).then(async (res) => {
       if (res.status === 404) return setDenied(true);
       const data = await res.json();
@@ -69,6 +72,8 @@ export default function AdminPage() {
       { label: "Lá số đã lưu", value: users.reduce((s, u) => s + Number(u.charts), 0) },
     ];
   }, [users]);
+
+  const visible = session ? users : null;
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -96,7 +101,7 @@ export default function AdminPage() {
 
       {session && !users && !error && <div className="mt-8 h-40 animate-pulse rounded-2xl bg-paper" aria-label="Đang tải" />}
 
-      {stats && (
+      {stats && visible && (
         <>
           <dl className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {stats.map((s) => (
