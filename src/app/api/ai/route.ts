@@ -64,7 +64,12 @@ export async function POST(req: Request) {
     ...(question ? [{ chart_id: chartId, user_id: user.id, role: "user", content: question }] : []),
     { chart_id: chartId, user_id: user.id, role: "assistant", content: answer },
   ];
-  await supabaseAdmin.from("messages").insert(rows);
+  const { error: saveError } = await supabaseAdmin.from("messages").insert(rows);
+  if (saveError) {
+    console.error("save messages error", saveError);
+    await supabaseAdmin.rpc("refund_ai_credit", { p_user: user.id });
+    return err(500, "Không lưu được câu trả lời, vui lòng thử lại. Lượt dùng chưa bị trừ.");
+  }
 
   return NextResponse.json({ answer, used, limit: DAILY_LIMIT });
 }
