@@ -56,7 +56,7 @@ export default function AdminPage() {
       const data = await res.json();
       if (!res.ok) return setError(data.error ?? "Có lỗi xảy ra");
       setUsers(data.users);
-    });
+    }).catch(() => setError("Không tải được dữ liệu, vui lòng thử lại"));
   }, [session]);
 
   const stats = useMemo(() => {
