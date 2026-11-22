@@ -45,3 +45,5 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .vercel
+
+!.env.example
