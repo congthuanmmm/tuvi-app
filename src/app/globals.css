@@ -8,7 +8,20 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-ink: #09043b;
+  --color-ink-soft: #1d1766;
+  --color-gold: #fdcf4f;
+  --color-gold-deep: #8a5d00;
+  --color-paper: #fffaf0;
+  --color-line: #09043b26;
   --font-sans: var(--font-be-vietnam), var(--font-noto-sc), "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-serif: var(--font-noto-serif), var(--font-noto-sc), serif;
+}
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
 
 body {
@@ -17,9 +30,14 @@ body {
   font-family: var(--font-sans);
 }
 
-.prose-reading h2 { font-weight: 700; font-size: 1.1rem; color: #7f1d1d; margin: 1rem 0 0.4rem; }
-.prose-reading h3 { font-weight: 600; margin: 0.8rem 0 0.3rem; }
-.prose-reading p { margin: 0.4rem 0; }
+:focus-visible { outline: 2px solid #8a5d00; outline-offset: 2px; }
+
+dialog::backdrop { background: rgb(9 4 59 / 0.55); }
+
+.prose-reading h2 { font-family: var(--font-serif); font-weight: 700; font-size: 1.15rem; color: #09043b; margin: 1rem 0 0.4rem; }
+.prose-reading h3 { font-weight: 600; color: #09043b; margin: 0.8rem 0 0.3rem; }
+.prose-reading p { margin: 0.5rem 0; }
 .prose-reading ul { list-style: disc; padding-left: 1.25rem; margin: 0.4rem 0; }
 .prose-reading ol { list-style: decimal; padding-left: 1.25rem; margin: 0.4rem 0; }
-.prose-reading strong { color: #44403c; }
+.prose-reading li { margin: 0.2rem 0; }
+.prose-reading strong { color: #09043b; }

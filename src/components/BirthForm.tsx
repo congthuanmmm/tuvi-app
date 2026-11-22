@@ -19,14 +19,33 @@ const HOURS = [
 ];
 
 const inputCls =
-  "w-full rounded-md border border-amber-900/40 bg-white/80 px-3 py-2 text-stone-900 focus:border-amber-700 focus:outline-none";
+  "h-11 w-full rounded-lg border border-line bg-white px-3 text-base text-stone-900 transition-colors placeholder:text-stone-400 focus:border-ink focus:outline-none focus:ring-2 focus:ring-gold/60";
+const labelCls = "mb-1.5 block text-sm font-medium text-stone-800";
+
+function Segmented<T extends string>({ name, value, options, onChange }: {
+  name: string; value: T; options: { value: T; label: string }[]; onChange: (v: T) => void;
+}) {
+  return (
+    <div role="radiogroup" aria-label={name} className="grid auto-cols-fr grid-flow-col gap-1 rounded-lg bg-ink/5 p-1">
+      {options.map((o) => (
+        <label key={o.value}
+          className={`flex h-9 cursor-pointer items-center justify-center rounded-md text-sm font-medium transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-gold ${value === o.value ? "bg-ink text-white shadow-sm" : "text-stone-700 hover:bg-white/70"}`}>
+          <input type="radio" name={name} className="sr-only" checked={value === o.value} onChange={() => onChange(o.value)} />
+          {o.label}
+        </label>
+      ))}
+    </div>
+  );
+}
 
 export default function BirthForm({
   onSubmit,
   loading,
+  serverError,
 }: {
   onSubmit: (input: BirthInput) => void;
   loading: boolean;
+  serverError?: string;
 }) {
   const [name, setName] = useState("");
   const [calendar, setCalendar] = useState<"solar" | "lunar">("solar");
@@ -69,93 +88,85 @@ export default function BirthForm({
   }
 
   return (
-    <form onSubmit={submit} className="space-y-4 rounded-xl border border-amber-900/30 bg-amber-50/90 p-5 shadow-md">
+    <form onSubmit={submit} noValidate className="space-y-4">
       <div>
-        <label className="mb-1 block text-sm font-medium">Họ tên (không bắt buộc)</label>
-        <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} placeholder="Nguyễn Văn A" />
+        <label htmlFor="bf-name" className={labelCls}>Họ tên <span className="font-normal text-stone-500">(không bắt buộc)</span></label>
+        <input id="bf-name" className={inputCls} value={name} onChange={(e) => setName(e.target.value)} placeholder="Nguyễn Văn A" autoComplete="name" />
       </div>
 
       <div>
-        <div className="mb-1 flex items-center gap-4 text-sm font-medium">
-          <span>Ngày sinh</span>
-          {(["solar", "lunar"] as const).map((c) => (
-            <label key={c} className="flex items-center gap-1 font-normal">
-              <input type="radio" checked={calendar === c} onChange={() => setCalendar(c)} />
-              {c === "solar" ? "Dương lịch" : "Âm lịch"}
-            </label>
-          ))}
-        </div>
-        <div className="grid grid-cols-3 gap-2">
-          <input className={inputCls} inputMode="numeric" placeholder="Ngày" aria-label="Ngày" value={date.day}
-            onChange={(e) => setDate({ ...date, day: e.target.value })} />
-          <input className={inputCls} inputMode="numeric" placeholder="Tháng" aria-label="Tháng" value={date.month}
-            onChange={(e) => setDate({ ...date, month: e.target.value })} />
-          <input className={inputCls} inputMode="numeric" placeholder="Năm" aria-label="Năm" value={date.year}
-            onChange={(e) => setDate({ ...date, year: e.target.value })} />
+        <span className={labelCls}>Lịch</span>
+        <Segmented name="Loại lịch" value={calendar} onChange={setCalendar}
+          options={[{ value: "solar", label: "Dương lịch" }, { value: "lunar", label: "Âm lịch" }]} />
+      </div>
+
+      <fieldset>
+        <legend className={labelCls}>Ngày sinh</legend>
+        <div className="grid grid-cols-[1fr_1fr_1.4fr] gap-2">
+          <input className={inputCls} inputMode="numeric" placeholder="Ngày" aria-label="Ngày sinh" maxLength={2} value={date.day}
+            onChange={(e) => setDate({ ...date, day: e.target.value.replace(/\D/g, "") })} />
+          <input className={inputCls} inputMode="numeric" placeholder="Tháng" aria-label="Tháng sinh" maxLength={2} value={date.month}
+            onChange={(e) => setDate({ ...date, month: e.target.value.replace(/\D/g, "") })} />
+          <input className={inputCls} inputMode="numeric" placeholder="Năm" aria-label="Năm sinh" maxLength={4} value={date.year}
+            onChange={(e) => setDate({ ...date, year: e.target.value.replace(/\D/g, "") })} />
         </div>
         {calendar === "lunar" && (
-          <label className="mt-2 flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={isLeap} onChange={(e) => setIsLeap(e.target.checked)} />
-            Tháng nhuận
+          <label className="mt-2 flex min-h-11 cursor-pointer items-center gap-2 text-sm">
+            <input type="checkbox" className="h-4 w-4 accent-ink" checked={isLeap} onChange={(e) => setIsLeap(e.target.checked)} />
+            Sinh vào tháng nhuận
           </label>
         )}
-      </div>
+      </fieldset>
 
       <div>
-        <div className="mb-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm font-medium">
-          <span className="w-full">Giờ sinh</span>
-          <label className="flex items-center gap-1 font-normal">
-            <input type="radio" checked={timeMode === "exact"} onChange={() => setTimeMode("exact")} /> Giờ chính xác
-          </label>
-          <label className="flex items-center gap-1 font-normal">
-            <input type="radio" checked={timeMode === "branch"} onChange={() => setTimeMode("branch")} /> Theo canh giờ
-          </label>
+        <span className={labelCls}>Giờ sinh</span>
+        <Segmented name="Cách nhập giờ" value={timeMode} onChange={setTimeMode}
+          options={[{ value: "exact", label: "Giờ chính xác" }, { value: "branch", label: "Theo canh giờ" }]} />
+        <div className="mt-2">
+          {timeMode === "exact" ? (
+            <input type="time" className={inputCls} aria-label="Giờ sinh" value={time} onChange={(e) => setTime(e.target.value)} />
+          ) : (
+            <select className={inputCls} aria-label="Canh giờ" value={branchHour} onChange={(e) => setBranchHour(Number(e.target.value))}>
+              {HOURS.map((h) => (
+                <option key={h.hour} value={h.hour}>{h.label}</option>
+              ))}
+            </select>
+          )}
         </div>
-        {timeMode === "exact" ? (
-          <input type="time" className={inputCls} aria-label="Giờ sinh" value={time} onChange={(e) => setTime(e.target.value)} />
-        ) : (
-          <select className={inputCls} aria-label="Canh giờ" value={branchHour} onChange={(e) => setBranchHour(Number(e.target.value))}>
-            {HOURS.map((h) => (
-              <option key={h.hour} value={h.hour}>{h.label}</option>
-            ))}
-          </select>
-        )}
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="mb-1 block text-sm font-medium">Giới tính</label>
-          <select className={inputCls} aria-label="Giới tính" value={gender} onChange={(e) => setGender(e.target.value as "男" | "女")}>
-            <option value="男">Nam</option>
-            <option value="女">Nữ</option>
-          </select>
+          <span className={labelCls}>Giới tính</span>
+          <Segmented name="Giới tính" value={gender} onChange={setGender}
+            options={[{ value: "男", label: "Nam" }, { value: "女", label: "Nữ" }]} />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium">Nơi sinh</label>
-          <input className={inputCls} value={birthplace} onChange={(e) => setBirthplace(e.target.value)} placeholder="Hà Nội" />
+          <label htmlFor="bf-place" className={labelCls}>Nơi sinh</label>
+          <input id="bf-place" className={`${inputCls} h-11`} value={birthplace} onChange={(e) => setBirthplace(e.target.value)} placeholder="Hà Nội" />
         </div>
       </div>
 
-      <details className="text-sm">
-        <summary className="cursor-pointer text-amber-900">Tùy chọn nâng cao</summary>
-        <div className="mt-2 space-y-1">
+      <details className="group text-sm">
+        <summary className="flex min-h-11 cursor-pointer items-center font-medium text-gold-deep">Tùy chọn nâng cao</summary>
+        <div className="space-y-1 rounded-lg bg-ink/5 p-3">
           <p className="font-medium">Sinh từ 23h đến 24h (giờ Tý muộn):</p>
-          <label className="flex items-center gap-2">
-            <input type="radio" checked={lateZi === "next_day"} onChange={() => setLateZi("next_day")} />
+          <label className="flex min-h-9 cursor-pointer items-center gap-2">
+            <input type="radio" name="late-zi" className="accent-ink" checked={lateZi === "next_day"} onChange={() => setLateZi("next_day")} />
             Tính sang ngày hôm sau (mặc định)
           </label>
-          <label className="flex items-center gap-2">
-            <input type="radio" checked={lateZi === "same_day"} onChange={() => setLateZi("same_day")} />
+          <label className="flex min-h-9 cursor-pointer items-center gap-2">
+            <input type="radio" name="late-zi" className="accent-ink" checked={lateZi === "same_day"} onChange={() => setLateZi("same_day")} />
             Giữ ngày hiện tại
           </label>
         </div>
       </details>
 
-      {error && <p className="text-sm text-red-700">{error}</p>}
+      {(error || serverError) && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-800">{error || serverError}</p>}
 
       <button type="submit" disabled={loading}
-        className="w-full rounded-md bg-red-800 px-4 py-2.5 font-semibold text-amber-50 hover:bg-red-900 disabled:opacity-60">
-        {loading ? "Đang lập lá số..." : "Lập lá số"}
+        className="h-12 w-full cursor-pointer rounded-xl bg-ink px-4 text-base font-semibold text-gold shadow-md transition-colors hover:bg-ink-soft disabled:cursor-wait disabled:opacity-70">
+        {loading ? "Đang lập lá số..." : "Lập lá số miễn phí"}
       </button>
     </form>
   );
