@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { X } from "lucide-react";
+import Link from "next/link";
+import { BookOpen, X } from "lucide-react";
 import type { ChartResult, Palace, StarRef } from "@/lib/ziwei/types";
 import { SIHUA_SHORT, vi, viHan } from "@/lib/ziwei/i18n";
 import { PALACE_MEANING } from "@/lib/ziwei/palaces";
+import { entryByHan, wikiPath } from "@/lib/wiki/catalog";
 
 // Vị trí 12 cung trên lưới 4x4 (theo địa chi), bố cục lá số truyền thống
 const GRID_POS: Record<string, { row: number; col: number }> = {
@@ -79,11 +81,21 @@ function PalaceCell({ palace, flags, onSelect }: { palace: Palace; flags: CellFl
   );
 }
 
+function StarName({ han }: { han: string }) {
+  const entry = entryByHan(han);
+  if (!entry) return <span className="font-semibold text-ink">{vi(han)}</span>;
+  return (
+    <Link href={wikiPath(entry)} className="font-semibold text-ink underline decoration-gold-deep/50 underline-offset-4 hover:decoration-gold-deep">
+      {vi(han)}
+    </Link>
+  );
+}
+
 function StarLine({ star }: { star: StarRef }) {
   return (
     <li className="flex items-center justify-between gap-2 py-1.5">
       <span>
-        <span className="font-semibold text-ink">{vi(star.name)}</span> <span className="text-stone-500">{star.name}</span>
+        <StarName han={star.name} /> <span className="text-stone-500">{star.name}</span>
         <Sihua s={star.sihua} />
       </span>
       {star.brightness && <span className="text-sm text-stone-600">{vi(star.brightness)}</span>}
@@ -117,6 +129,12 @@ function PalaceSheet({ palace, flags, onClose }: { palace: Palace | null; flags:
                 Cung {vi(palace.name)} <span className="text-lg font-normal text-stone-500">{palace.name}</span>
               </h2>
               <p className="mt-0.5 text-sm text-stone-600">{PALACE_MEANING[palace.name]}</p>
+              {entryByHan(palace.name) && (
+                <Link href={wikiPath(entryByHan(palace.name)!)}
+                  className="mt-1 inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-ink underline decoration-gold-deep/50 underline-offset-4 hover:decoration-gold-deep">
+                  <BookOpen size={16} aria-hidden="true" /> Ý nghĩa cung {vi(palace.name)} trong Wiki tử vi
+                </Link>
+              )}
             </div>
             <button onClick={onClose} aria-label="Đóng"
               className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full text-stone-500 transition-colors hover:bg-stone-200/60">

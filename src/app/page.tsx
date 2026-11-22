@@ -4,7 +4,10 @@ import HeroForm from "@/components/HeroForm";
 import Reveal from "@/components/Reveal";
 import { PALACE_INFO } from "@/lib/ziwei/palaces";
 import { CONTACT_EMAIL } from "@/components/SiteFooter";
+import { FAQ } from "@/lib/content";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
+import { WIKI_TYPES, wikiPath, type WikiType } from "@/lib/wiki/catalog";
+import { publishedEntries } from "@/lib/wiki/content";
 
 const FEATURES = [
   { icon: LayoutGrid, title: "Lá số 12 cung", text: "An đủ 14 chính tinh, phụ tinh, tứ hóa và độ sáng theo phái Tam Hợp, kèm tên chữ Hán." },
@@ -17,15 +20,6 @@ const STEPS = [
   { title: "Nhập ngày giờ sinh", text: "Dương lịch hoặc âm lịch, giờ chính xác hoặc theo canh giờ." },
   { title: "Xem lá số 12 cung", text: "Bấm vào từng cung để xem chi tiết các sao và đại hạn." },
   { title: "Luận giải và hỏi thêm", text: "Đăng nhập bằng Google để nhận 3 lượt AI miễn phí mỗi ngày." },
-];
-
-const FAQ = [
-  { q: "Lập lá số có mất phí không?", a: "Lập và xem lá số hoàn toàn miễn phí, không giới hạn. Luận giải và hỏi đáp bằng AI được 3 lượt miễn phí mỗi ngày cho mỗi tài khoản." },
-  { q: "Cần thông tin gì để lập lá số?", a: "Ngày tháng năm sinh (dương hoặc âm lịch), giờ sinh và giới tính. Họ tên và nơi sinh không bắt buộc." },
-  { q: "Không nhớ giờ sinh chính xác thì sao?", a: "Bạn có thể chọn theo canh giờ (Tý, Sửu, Dần...). Nếu giờ sinh nằm sát ranh giới hai canh giờ, app sẽ nhắc bạn lập thêm lá số giờ liền kề để đối chiếu." },
-  { q: "Lá số được tính theo trường phái nào?", a: "Phái Tam Hợp. Sinh sau 23h mặc định tính sang ngày hôm sau, bạn có thể đổi trong mục Tùy chọn nâng cao. Thuật toán có hơn 200 bài kiểm thử tự động." },
-  { q: "AI luận giải dựa trên gì?", a: "AI chỉ đọc lá số đã được tính sẵn và các quy tắc luận giải Tử Vi, không tự an sao lại. Nội dung mang tính tham khảo, không thay thế tư vấn chuyên môn." },
-  { q: "Thông tin của tôi có được bảo mật không?", a: "Lá số chỉ hiển thị với chính tài khoản của bạn và bạn có thể xóa bất cứ lúc nào. Xem chi tiết trong Chính sách bảo mật." },
 ];
 
 const JSON_LD = {
@@ -143,6 +137,37 @@ export default function Home() {
             ))}
           </ul>
         </Reveal>
+      </section>
+
+      <section id="wiki" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-12">
+        <Reveal className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 className="font-serif text-3xl font-bold text-ink">Wiki tử vi</h2>
+            <p className="mt-2 max-w-2xl text-stone-700">Tra cứu ý nghĩa các sao, 12 cung, tứ hóa và cách cục thường gặp trên lá số.</p>
+          </div>
+          <Link href="/tu-vi" className="inline-flex min-h-11 items-center font-semibold text-ink underline decoration-gold-deep underline-offset-4">
+            Xem toàn bộ Wiki
+          </Link>
+        </Reveal>
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {(Object.keys(WIKI_TYPES) as WikiType[]).filter((t) => publishedEntries().some((x) => x.type === t)).map((t) => (
+            <Reveal key={t} className="flex flex-col rounded-2xl border border-line bg-paper p-5">
+              <h3 className="font-serif text-xl font-bold text-ink">
+                <Link href={`/tu-vi/${t}`} className="hover:underline">{WIKI_TYPES[t].label}</Link>
+              </h3>
+              <p className="mt-1 text-sm text-stone-600">{WIKI_TYPES[t].description}</p>
+              <ul className="mt-3 flex flex-wrap gap-2">
+                {publishedEntries().filter((x) => x.type === t).slice(0, 6).map((x) => (
+                  <li key={x.slug}>
+                    <Link href={wikiPath(x)} className="inline-flex min-h-9 items-center rounded-full bg-background px-3 text-sm text-ink transition-colors hover:bg-gold/30">
+                      {x.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </Reveal>
+          ))}
+        </div>
       </section>
 
       <section id="hoi-dap" className="mx-auto max-w-3xl scroll-mt-20 px-4 py-12">
