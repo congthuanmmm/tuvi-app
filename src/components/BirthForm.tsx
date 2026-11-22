@@ -50,7 +50,7 @@ export default function BirthForm({
     let hour = branchHour, minute = 0;
     if (timeMode === "exact") {
       const [h, m] = time.split(":").map(Number);
-      if (Number.isNaN(h)) {
+      if (!time || Number.isNaN(h)) {
         setError("Vui lòng nhập giờ sinh.");
         return;
       }
