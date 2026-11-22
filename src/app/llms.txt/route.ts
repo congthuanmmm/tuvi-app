@@ -2,6 +2,8 @@ import { CONTACT_EMAIL } from "@/components/SiteFooter";
 import { FAQ } from "@/lib/content";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import { PALACE_INFO } from "@/lib/ziwei/palaces";
+import { WIKI_TYPES, wikiPath, type WikiType } from "@/lib/wiki/catalog";
+import { loadWiki, publishedEntries } from "@/lib/wiki/content";
 
 export const dynamic = "force-static";
 
@@ -22,6 +24,16 @@ ${SITE_NAME} là ứng dụng web tiếng Việt để lập lá số Tử Vi Đ
 - [Trang chủ và lập lá số](${SITE_URL}/): form lập lá số, giới thiệu tính năng, ý nghĩa 12 cung, câu hỏi thường gặp
 - [Chính sách bảo mật](${SITE_URL}/privacy): dữ liệu thu thập, bên thứ ba (Supabase, Google Gemini, Vercel), quyền xóa dữ liệu
 - [Điều khoản sử dụng](${SITE_URL}/terms): giới hạn lượt dùng AI, miễn trừ trách nhiệm
+
+## Wiki tử vi
+
+- [Wiki tử vi](${SITE_URL}/tu-vi): mục lục bài viết về sao, cung, tứ hóa và cách cục
+
+${(Object.keys(WIKI_TYPES) as WikiType[]).map((t) => {
+  const items = publishedEntries().filter((x) => x.type === t);
+  if (!items.length) return "";
+  return `### ${WIKI_TYPES[t].label}\n\n${items.map((x) => `- [${x.name} (${x.han})](${SITE_URL}${wikiPath(x)}): ${loadWiki(x)?.summary.split(/(?<=\.)\s/)[0] ?? ""}`).join("\n")}`;
+}).filter(Boolean).join("\n\n")}
 
 ## 12 cung trên lá số tử vi
 

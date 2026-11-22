@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { History, LogOut } from "lucide-react";
+import { History, LogOut, BookOpen } from "lucide-react";
 import { useLogin } from "@/components/LoginProvider";
 import { useSession } from "@/lib/hooks/useSession";
 import { supabase } from "@/lib/supabase/client";
@@ -22,10 +22,15 @@ export default function SiteHeader() {
         <nav aria-label="Chính" className="hidden items-center gap-6 text-sm font-medium text-stone-700 md:flex">
           <Link href="/#lap-la-so" className="transition-colors hover:text-ink">Lập lá số</Link>
           <Link href="/#12-cung" className="transition-colors hover:text-ink">12 cung</Link>
+          <Link href="/tu-vi" className="transition-colors hover:text-ink">Wiki tử vi</Link>
           <Link href="/#hoi-dap" className="transition-colors hover:text-ink">Hỏi đáp</Link>
           <Link href="/lich-su" className="transition-colors hover:text-ink">Lá số của tôi</Link>
         </nav>
         <div className="ml-auto flex items-center gap-2">
+          <Link href="/tu-vi" aria-label="Wiki tử vi"
+            className="grid h-10 w-10 place-items-center rounded-full text-ink transition-colors hover:bg-ink/5 md:hidden">
+            <BookOpen size={20} />
+          </Link>
           {ready && session ? (
             <>
               <Link href="/lich-su" aria-label="Lá số của tôi"

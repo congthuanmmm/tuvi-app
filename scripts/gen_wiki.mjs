@@ -55,7 +55,7 @@ Danh sách slug hợp lệ cho related: ${allSlugs}
 
 Tài liệu tham khảo:
 ${SOURCES[entry.type]()}`;
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  for (let attempt = 1; attempt <= 6; attempt++) {
     try {
       const res = await ai.models.generateContent({
         model: MODEL,
@@ -63,6 +63,8 @@ ${SOURCES[entry.type]()}`;
         config: { systemInstruction: SYSTEM, temperature: 0.6, responseMimeType: "application/json", responseSchema: schema },
       });
       const data = JSON.parse(res.text);
+      const stray = JSON.stringify(data).replace(/（[^）]*）|\([^)]*\)/g, "").match(/[\u4e00-\u9fff]+/g);
+      if (stray) throw new Error(`stray han ${stray.join(",")}`);
       const valid = new Set(ENTRIES.map((x) => `${x.type}/${x.slug}`));
       data.related = data.related.filter((r) => valid.has(r) && r !== `${entry.type}/${entry.slug}`);
       mkdirSync(dirname(out), { recursive: true });
@@ -71,6 +73,8 @@ ${SOURCES[entry.type]()}`;
       return console.log("ok", out, `${words} words`);
     } catch (err) {
       console.error("retry", entry.slug, attempt, err.message?.slice(0, 120));
+      const wait = Number(err.message?.match(/retry in ([\d.]+)s/)?.[1] ?? 5);
+      await new Promise((r) => setTimeout(r, (wait + 2) * 1000));
     }
   }
   throw new Error(`failed ${entry.slug}`);
@@ -78,6 +82,6 @@ ${SOURCES[entry.type]()}`;
 
 const picks = process.argv.slice(2).filter((a) => !a.startsWith("--"));
 const todo = picks.length ? ENTRIES.filter((x) => picks.includes(`${x.type}/${x.slug}`)) : ENTRIES;
-const CONCURRENCY = 4;
+const CONCURRENCY = Number(process.env.WIKI_CONCURRENCY || 2);
 for (let i = 0; i < todo.length; i += CONCURRENCY) await Promise.all(todo.slice(i, i + CONCURRENCY).map(gen));
 console.log("entries", ENTRIES.length, "done", todo.length);
