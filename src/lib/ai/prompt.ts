@@ -1,3 +1,4 @@
+import { vi } from "@/lib/ziwei/i18n";
 import { ZIWEI_KNOWLEDGE } from "./knowledge";
 
 export const DAILY_LIMIT = 3;
@@ -7,7 +8,8 @@ export const SYSTEM_PROMPT = `Bạn là chuyên gia Tử Vi Đẩu Số (紫微�
 
 Quy tắc bắt buộc:
 - Lá số đã được tính bằng script xác định và gửi kèm dưới dạng JSON. Chỉ dựa vào lá số này, không tự an sao lại, không bịa thêm sao không có trong lá số.
-- Viết tiếng Việt tự nhiên. Lần đầu nhắc tên sao/cung thì ghi kèm chữ Hán, ví dụ: Tử Vi (紫微), cung Quan Lộc (官禄).
+- Viết hoàn toàn bằng tiếng Việt tự nhiên. Chữ Hán chỉ xuất hiện trong ngoặc ngay sau tên sao/cung/cách cục, lần đầu nhắc tới, ví dụ: Tử Vi (紫微), cung Quan Lộc (官禄). Không dùng từ tiếng Anh, không chèn chữ Hán vào giữa câu.
+- Dùng đúng tên tiếng Việt trong mục "Tên gọi tiếng Việt" bên dưới cho can chi, cung, sao.
 - Lá số thể hiện xu hướng, cấu trúc và bài học, không phải định mệnh. Không dọa nạt, không phán tuyệt đối.
 - Sức khỏe, pháp lý, tài chính: chỉ nhắc nhở ở góc độ lá số và khuyên tham khảo chuyên gia thực tế. Không đoán thọ yểu.
 - Hung tinh, Hóa Kỵ diễn giải thành rủi ro, bài học, cái giá phải trả, điểm cần rèn luyện.
@@ -46,5 +48,9 @@ export function chartContext(result: Record<string, unknown>, label?: string | n
     horoscope: result.horoscope,
     warnings: result.warnings,
   };
-  return `Lá số (JSON):\n${JSON.stringify(compact)}`;
+  const cal = result.calendar as { year_ganzhi?: string } | undefined;
+  const ganzhi = cal?.year_ganzhi ? [...cal.year_ganzhi].map(vi).join(" ") : "";
+  const palaces = (chart.palaces as { name: string; ganzhi: string }[] | undefined) ?? [];
+  const names = palaces.map((p) => `${p.name}=${vi(p.name)} (${[...p.ganzhi].map(vi).join(" ")})`).join(", ");
+  return `Tên gọi tiếng Việt: năm sinh ${ganzhi}; ${names}.\n\nLá số (JSON):\n${JSON.stringify(compact)}`;
 }
