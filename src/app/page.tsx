@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import AuthBar from "@/components/AuthBar";
 import BirthForm from "@/components/BirthForm";
@@ -127,6 +128,10 @@ export default function Home() {
 
       <footer className="mt-10 text-center text-xs text-stone-500">
         Lá số chỉ mang tính tham khảo, không thay thế tư vấn y tế, pháp lý hay tài chính.
+        <div className="mt-2 space-x-3">
+          <Link href="/privacy" className="hover:underline">Chính sách bảo mật</Link>
+          <Link href="/terms" className="hover:underline">Điều khoản sử dụng</Link>
+        </div>
       </footer>
     </main>
   );
