@@ -7,10 +7,19 @@ const NAME_FIXES: [RegExp, string][] = [
   [/Bất Đắc Địa(?!\p{L})/gu, "Bất Đắc"],
   [/Bất Địa(?!\p{L})/gu, "Bất Đắc"],
 ];
+export const PATTERN_VI: Record<string, string> = {
+  紫府同宫: "Tử Phủ đồng cung", 紫杀同宫: "Tử Sát đồng cung", 武府同宫: "Vũ Phủ đồng cung", 日月并明: "Nhật Nguyệt tịnh minh",
+  日照雷门: "Nhật chiếu Lôi Môn", 阳梁昌禄: "Dương Lương Xương Lộc", 机月同梁: "Cơ Nguyệt Đồng Lương", 火贪格: "Hỏa Tham", 铃贪格: "Linh Tham",
+  禄马交驰: "Lộc Mã giao trì", 三奇加会: "Tam Kỳ gia hội", 双禄朝垣: "Song Lộc triều viên", 命无正曜: "Mệnh vô chính diệu",
+  羊陀夹命: "Kình Đà giáp Mệnh", 空劫夹命: "Không Kiếp giáp Mệnh", 巨机化忌: "Cự Cơ Hóa Kỵ", 廉贞七杀: "Liêm Trinh Thất Sát",
+  刑忌夹印: "Hình Kỵ giáp Ấn", 杀破狼: "Sát Phá Tham",
+};
+export const patternVi = (han: string) => han.split(/\s*\/\s*/).map((h) => PATTERN_VI[h] ?? h).join(" / ");
 const SIHUA: Record<string, string> = { 禄: "Lộc", 权: "Quyền", 科: "Khoa", 忌: "Kỵ" };
 
 function toVi(han: string, before: string): string {
   if (/Hóa\s$/.test(before) && SIHUA[han]) return SIHUA[han];
+  if (PATTERN_VI[han]) return PATTERN_VI[han];
   for (const h of [han, han.replace(/[星宫]$/, "")]) {
     const v = vi(h);
     if (v !== h) return v;

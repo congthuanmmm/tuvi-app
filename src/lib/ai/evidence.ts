@@ -1,5 +1,6 @@
 import { KB } from "./kb";
 import { vi } from "@/lib/ziwei/i18n";
+import { patternVi } from "./clean";
 import type { ChartResult, Palace, SihuaItem } from "@/lib/ziwei/types";
 
 const BRANCHES = "子丑寅卯辰巳午未申酉戌亥";
@@ -74,9 +75,10 @@ export function detectPatterns(r: ChartResult): PatternHit[] {
   for (const fire of ["火星", "铃星"]) {
     const t = v.where("贪狼");
     if (!t) continue;
+    const [, opp, tri1, tri2] = v.sanfang(t);
     const same = v.has(t, fire);
-    const opp = v.has(v.at(v.idx(t) + 6), fire);
-    if (same || opp) add("火贪格 / 铃贪格", true, `Tham Lang tại ${vi(t.name)} ${same ? "đồng cung" : "xung chiếu"} với ${vi(fire)}`, same || sf.includes(t));
+    const how = same ? "đồng cung" : v.has(opp, fire) ? "xung chiếu" : v.has(tri1, fire) || v.has(tri2, fire) ? "tam hợp chiếu" : "";
+    if (how) add("火贪格 / 铃贪格", true, `Tham Lang tại ${vi(t.name)} ${how} với ${vi(fire)}`, same || sf.includes(t));
   }
   const lucun = v.where("禄存");
   const ma = v.where("天马");
@@ -89,8 +91,9 @@ export function detectPatterns(r: ChartResult): PatternHit[] {
     add("命无正曜", true, `Mệnh vô chính diệu, mượn chính tinh cung Thiên Di: ${opp.major_stars.map((s) => vi(s.name)).join(", ") || "không có"}`);
   }
   const nb = [v.at(v.idx(ming) - 1), v.at(v.idx(ming) + 1)];
-  add("羊陀夹命", v.inGroup(nb, "擎羊") && v.inGroup(nb, "陀罗"), "Kình Dương và Đà La ở hai cung kẹp Mệnh");
-  const kongjie = v.inGroup(nb, "地空") && v.inGroup(nb, "地劫");
+  const flank = (a: string, b: string) => (v.has(nb[0], a) && v.has(nb[1], b)) || (v.has(nb[0], b) && v.has(nb[1], a));
+  add("羊陀夹命", flank("擎羊", "陀罗"), "Kình Dương và Đà La ở hai cung kẹp Mệnh");
+  const kongjie = flank("地空", "地劫");
   const kjSf = v.inGroup(sf, "地空") && v.inGroup(sf, "地劫");
   add("空劫夹命", kongjie || kjSf, kongjie ? "Địa Không và Địa Kiếp kẹp Mệnh" : "Địa Không và Địa Kiếp không kẹp Mệnh mà cùng hội tam phương tứ chính Mệnh, nên chưa đủ điều kiện thành cách, chỉ mang một phần tính chất", kongjie);
   const ji = natal("化忌");
@@ -183,7 +186,7 @@ export function buildEvidence(r: ChartResult): string {
   const hits = detectPatterns(r);
   if (!hits.length) out.push("- Không có cách cục nào trong tài liệu khớp với lá số. Không được gán cách cục.");
   for (const p of hits) {
-    out.push(`- ${p.name} (${p.status}): ${p.why}.\n  Tài liệu: ${KB.patterns[p.name as keyof typeof KB.patterns].replace(/\n+/g, " ")}`);
+    out.push(`- ${patternVi(p.name)} (${p.name}) (${p.status}): ${p.why}.\n  Tài liệu: ${KB.patterns[p.name as keyof typeof KB.patterns].replace(/\n+/g, " ")}`);
     const w = kbGet(KB.wiki as Record<string, { summary: string; sections: string }>, `cach-cuc:${p.name.split(" / ")[0]}`);
     if (w) out.push(`  [Wiki] ${w.summary} ${clip(w.sections.replace(/\n+/g, " "), 1200)}`);
   }
