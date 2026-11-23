@@ -39,26 +39,26 @@ ${KB.extra.shaNote}
 ${KB.extra.luma}`;
 
 const PALACE_SECTIONS: [string, string, string][] = [
-  ["命宫", "Cung Mệnh", "3-4 đoạn"], ["官禄", "Cung Quan Lộc (sự nghiệp)", "3-4 đoạn"], ["财帛", "Cung Tài Bạch (tiền bạc)", "3-4 đoạn"],
-  ["夫妻", "Cung Phu Thê (tình cảm, hôn nhân)", "3-4 đoạn"], ["迁移", "Cung Thiên Di (môi trường bên ngoài)", "2-3 đoạn"],
-  ["福德", "Cung Phúc Đức (tinh thần)", "2-3 đoạn"], ["兄弟", "Cung Huynh Đệ", "1-2 đoạn"], ["子女", "Cung Tử Tức", "1-2 đoạn"],
-  ["疾厄", "Cung Tật Ách (sức khỏe)", "1-2 đoạn"], ["交友", "Cung Nô Bộc (bạn bè, cộng sự)", "1-2 đoạn"],
-  ["田宅", "Cung Điền Trạch (nhà cửa, tài sản)", "1-2 đoạn"], ["父母", "Cung Phụ Mẫu", "1-2 đoạn"],
+  ["命宫", "Cung Mệnh", "khoảng 230 chữ"], ["官禄", "Cung Quan Lộc (sự nghiệp)", "khoảng 230 chữ"], ["财帛", "Cung Tài Bạch (tiền bạc)", "khoảng 230 chữ"],
+  ["夫妻", "Cung Phu Thê (tình cảm, hôn nhân)", "khoảng 230 chữ"], ["迁移", "Cung Thiên Di (môi trường bên ngoài)", "khoảng 150 chữ"],
+  ["福德", "Cung Phúc Đức (tinh thần)", "khoảng 150 chữ"], ["兄弟", "Cung Huynh Đệ", "tối đa 80 chữ"], ["子女", "Cung Tử Tức", "tối đa 80 chữ"],
+  ["疾厄", "Cung Tật Ách (sức khỏe)", "tối đa 80 chữ"], ["交友", "Cung Nô Bộc (bạn bè, cộng sự)", "tối đa 80 chữ"],
+  ["田宅", "Cung Điền Trạch (nhà cửa, tài sản)", "tối đa 80 chữ"], ["父母", "Cung Phụ Mẫu", "tối đa 80 chữ"],
 ];
 
-export const READING_INSTRUCTION = `Hãy luận giải chi tiết lá số trên theo đúng các phần sau (mỗi phần là một tiêu đề ##, giữ nguyên tên tiêu đề). Bắt đầu ngay bằng tiêu đề đầu tiên, không viết lời dẫn hay đường kẻ ngang:
+export const READING_INSTRUCTION = `Hãy luận giải chi tiết lá số trên theo đúng các phần sau (mỗi phần là một tiêu đề ##, giữ nguyên tên tiêu đề). Tổng độ dài khoảng 3.000 chữ, bám sát số chữ của từng phần: tập trung vào 6 cung chính, các cung phụ chỉ nêu điểm nổi bật nhất. Dòng Căn cứ ngắn gọn, tối đa 40 chữ. Không lặp lại ý đã nói ở phần trước. Bắt đầu ngay bằng tiêu đề đầu tiên, không viết lời dẫn hay đường kẻ ngang:
 
 ## Tổng quan và tính cách
-(3-4 đoạn: Mệnh và Thân, chính tinh và độ sáng, tam phương tứ chính của Mệnh, mật độ cát tinh, sát tinh, Hóa Kỵ; ưu thế bẩm sinh, tính cách và điểm yếu)
+(khoảng 300 chữ: Mệnh và Thân, chính tinh và độ sáng, tam phương tứ chính của Mệnh, mật độ cát tinh, sát tinh, Hóa Kỵ; ưu thế bẩm sinh, tính cách và điểm yếu)
 ## Cách cục
-(chỉ các cách cục trong hồ sơ, nêu vì sao thành hoặc gần thành, điều kiện phá cách; "gần thành cách" phải nói rõ là chưa thành cách; nếu không có thì nói lá số không thành cách rõ rệt và giải thích cấu trúc chính)
-${PALACE_SECTIONS.map(([, t, n]) => `## ${t}\n(${n}: sao trong cung, độ sáng, tứ hóa, tam phương tứ chính${n.startsWith("1") ? "" : ", biểu hiện cụ thể trong đời sống"})`).join("\n")}
+(khoảng 180 chữ: chỉ các cách cục trong hồ sơ, nêu vì sao thành hoặc gần thành, điều kiện phá cách; "gần thành cách" phải nói rõ là chưa thành cách; nếu không có thì nói lá số không thành cách rõ rệt và giải thích cấu trúc chính)
+${PALACE_SECTIONS.map(([, t, n]) => `## ${t}\n(${n}: ${n.startsWith("tối đa") ? "sao chính, tứ hóa và một điểm nổi bật nhất" : "sao trong cung, độ sáng, tứ hóa, tam phương tứ chính, biểu hiện cụ thể trong đời sống"})`).join("\n")}
 ## Đại hạn hiện tại
-(2-3 đoạn: cung đại hạn và tam phương tứ chính, tứ hóa đại hạn rơi vào đâu, chồng với tứ hóa sinh niên ra sao, chủ đề 10 năm này)
+(khoảng 220 chữ: cung đại hạn và tam phương tứ chính, tứ hóa đại hạn rơi vào đâu, chồng với tứ hóa sinh niên ra sao, chủ đề 10 năm này)
 ## Lưu niên năm nay
-(2 đoạn: Mệnh lưu niên, tứ hóa lưu niên, điểm kích hoạt trong năm, cơ hội và điều cần lưu ý)
+(khoảng 200 chữ: Mệnh lưu niên, tứ hóa lưu niên, điểm kích hoạt trong năm, cơ hội và điều cần lưu ý)
 ## Lời khuyên
-(ưu thế cốt lõi, bài học quan trọng nhất, gợi ý cho sự nghiệp và tình cảm)
+(khoảng 150 chữ: ưu thế cốt lõi, bài học quan trọng nhất, gợi ý cho sự nghiệp và tình cảm)
 
 Bắt buộc: cuối MỖI phần (trừ Lời khuyên) có đúng một dòng dạng
 > **Căn cứ:** <liệt kê ngắn gọn các chi tiết lá số và tài liệu đã dùng, ví dụ: Thái Dương Bất Đắc tại Mệnh; Cự Môn Hóa Quyền chiếu từ Tài Bạch; tài liệu: Hóa Quyền nhập Tài Bạch chủ kiếm tiền bằng nỗ lực>
