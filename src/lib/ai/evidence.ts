@@ -78,7 +78,7 @@ export function detectPatterns(r: ChartResult): PatternHit[] {
     const [, opp, tri1, tri2] = v.sanfang(t);
     const same = v.has(t, fire);
     const how = same ? "đồng cung" : v.has(opp, fire) ? "xung chiếu" : v.has(tri1, fire) || v.has(tri2, fire) ? "tam hợp chiếu" : "";
-    if (how) add("火贪格 / 铃贪格", true, `Tham Lang tại ${vi(t.name)} ${how} với ${vi(fire)}`, same || sf.includes(t));
+    if (how) add(fire === "火星" ? "火贪格" : "铃贪格", true, `Tham Lang tại ${vi(t.name)} ${how} với ${vi(fire)}`, same || sf.includes(t));
   }
   const lucun = v.where("禄存");
   const ma = v.where("天马");
@@ -186,8 +186,8 @@ export function buildEvidence(r: ChartResult): string {
   const hits = detectPatterns(r);
   if (!hits.length) out.push("- Không có cách cục nào trong tài liệu khớp với lá số. Không được gán cách cục.");
   for (const p of hits) {
-    out.push(`- ${patternVi(p.name)} (${p.name}) (${p.status}): ${p.why}.\n  Tài liệu: ${KB.patterns[p.name as keyof typeof KB.patterns].replace(/\n+/g, " ")}`);
-    const w = kbGet(KB.wiki as Record<string, { summary: string; sections: string }>, `cach-cuc:${p.name.split(" / ")[0]}`);
+    out.push(`- ${patternVi(p.name)} (${p.name}) (${p.status}): ${p.why}.\n  Tài liệu: ${(KB.patterns as Record<string, string>)[Object.keys(KB.patterns).find((k) => k.split(" / ").includes(p.name))!].replace(/\n+/g, " ")}`);
+    const w = kbGet(KB.wiki as Record<string, { summary: string; sections: string }>, `cach-cuc:${p.name}`);
     if (w) out.push(`  [Wiki] ${w.summary} ${clip(w.sections.replace(/\n+/g, " "), 1200)}`);
   }
   out.push("", "## 12 cung (thứ tự ưu tiên luận giải)");
