@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { Content } from "@google/genai";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { generate } from "@/lib/ai/gemini";
+import { tidyFirstReading } from "@/lib/ai/clean";
 import { DAILY_LIMIT, MAX_QUESTION_CHARS, READING_INSTRUCTION, chartContext } from "@/lib/ai/prompt";
 
 export const runtime = "nodejs";
@@ -54,6 +55,7 @@ export async function POST(req: Request) {
   let answer: string;
   try {
     answer = await generate(contents);
+    if (!question) answer = tidyFirstReading(answer);
   } catch (e) {
     console.error("gemini error", e);
     await supabaseAdmin.rpc("refund_ai_credit", { p_user: user.id });

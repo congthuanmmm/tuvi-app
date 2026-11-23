@@ -46,7 +46,7 @@ const PALACE_SECTIONS: [string, string, string][] = [
   ["田宅", "Cung Điền Trạch (nhà cửa, tài sản)", "1-2 đoạn"], ["父母", "Cung Phụ Mẫu", "1-2 đoạn"],
 ];
 
-export const READING_INSTRUCTION = `Hãy luận giải chi tiết lá số trên, dài khoảng 2.000-3.000 chữ, theo đúng các phần sau (mỗi phần là một tiêu đề ##, giữ nguyên tên tiêu đề):
+export const READING_INSTRUCTION = `Hãy luận giải chi tiết lá số trên theo đúng các phần sau (mỗi phần là một tiêu đề ##, giữ nguyên tên tiêu đề). Bắt đầu ngay bằng tiêu đề đầu tiên, không viết lời dẫn hay đường kẻ ngang:
 
 ## Tổng quan và tính cách
 (3-4 đoạn: Mệnh và Thân, chính tinh và độ sáng, tam phương tứ chính của Mệnh, mật độ cát tinh, sát tinh, Hóa Kỵ; ưu thế bẩm sinh, tính cách và điểm yếu)

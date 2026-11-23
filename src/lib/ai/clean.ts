@@ -45,3 +45,8 @@ export function cleanReading(md: string): string {
     .replace(/\( +/g, "(")
     .replace(/[^\S\n]{2,}/g, " ");
 }
+
+export function tidyFirstReading(md: string): string {
+  const start = md.search(/^## /m);
+  return (start > 0 ? md.slice(start) : md).replace(/^\s*-{3,}\s*$/gm, "").replace(/\n{3,}/g, "\n\n").trim();
+}
