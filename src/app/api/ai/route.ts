@@ -5,7 +5,7 @@ import { generate } from "@/lib/ai/gemini";
 import { DAILY_LIMIT, MAX_QUESTION_CHARS, READING_INSTRUCTION, chartContext } from "@/lib/ai/prompt";
 
 export const runtime = "nodejs";
-export const maxDuration = 120;
+export const maxDuration = 180;
 
 const err = (status: number, error: string) => NextResponse.json({ error }, { status });
 
