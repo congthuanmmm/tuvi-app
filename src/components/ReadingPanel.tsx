@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Send, Sparkles } from "lucide-react";
+import { ChevronRight, Send, Sparkles } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import { vnToday } from "@/lib/hooks/useSession";
@@ -28,6 +28,29 @@ function splitSections(md: string): { intro: string; sections: Section[] } {
   return { intro, sections };
 }
 
+const EVIDENCE = /^>\s*\*\*Căn cứ:?\*\*:?\s*(.*)$/gim;
+
+function Body({ md, className }: { md: string; className: string }) {
+  const evidence = [...md.matchAll(EVIDENCE)].map((m) => m[1].trim()).filter(Boolean);
+  const text = md.replace(EVIDENCE, "").trim();
+  return (
+    <>
+      <div className={className}><ReactMarkdown>{text}</ReactMarkdown></div>
+      {evidence.length > 0 && (
+        <details className="group mt-3 rounded-xl border border-line bg-background/60 px-4 py-2 text-sm text-stone-600">
+          <summary className="flex min-h-9 cursor-pointer list-none items-center gap-2 font-medium text-ink">
+            <ChevronRight className="size-4 transition-transform group-open:rotate-90" aria-hidden="true" />
+            Căn cứ trên lá số
+          </summary>
+          <ul className="mt-1 list-disc space-y-1 pb-2 pl-5">
+            {evidence.flatMap((e) => e.split(/;\s*/)).filter(Boolean).map((e, i) => <li key={i}>{e.replace(/\.$/, "")}</li>)}
+          </ul>
+        </details>
+      )}
+    </>
+  );
+}
+
 function Reading({ content }: { content: string }) {
   const { intro, sections } = splitSections(content);
   if (!sections.length) {
@@ -51,7 +74,7 @@ function Reading({ content }: { content: string }) {
         <Reveal as="section" key={s.id} className="scroll-mt-32 rounded-2xl border border-line bg-paper p-5">
           <span id={s.id} className="block scroll-mt-32" aria-hidden="true" />
           <h3 className="font-serif text-xl font-bold text-ink">{s.title}</h3>
-          <div className="prose-reading mt-2 text-[15px] leading-relaxed"><ReactMarkdown>{s.body}</ReactMarkdown></div>
+          <Body md={s.body} className="prose-reading mt-2 text-[15px] leading-relaxed" />
         </Reveal>
       ))}
     </div>
@@ -148,7 +171,7 @@ export default function ReadingPanel({ session, chartId, autoStart = false }: { 
                 <p key={i} className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-br-sm bg-ink px-4 py-2 text-white">{m.content}</p>
               ) : (
                 <div key={i} className="prose-reading max-w-[95%] rounded-2xl rounded-bl-sm bg-background/70 px-4 py-2 text-[15px] leading-relaxed">
-                  <ReactMarkdown>{m.content}</ReactMarkdown>
+                  <Body md={m.content} className="" />
                 </div>
               ),
             )}
